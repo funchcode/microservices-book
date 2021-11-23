@@ -1,7 +1,11 @@
 package microservices.book.multiplication.service;
 
 import microservices.book.multiplication.domain.Multiplication;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -9,23 +13,28 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 
-@SpringBootTest
 public class MultiplicationServiceTest {
 
-    @MockBean
+    private MultiplicationServiceImpl multiplicationServiceImpl;
+
+    @Mock
     private RandomGeneratorService randomGeneratorService;
-    @Autowired
-    private MultiplicationService multiplicationService;
+
+    @BeforeEach
+    public void setUp() {
+        MockitoAnnotations.initMocks(this);
+        multiplicationServiceImpl = new MultiplicationServiceImpl(randomGeneratorService);
+    }
 
     @Test
     public void createRandomMultiplicationTest() {
         // given
         given(randomGeneratorService.generateRandomFactor()).willReturn(50, 30);
         // when
-        Multiplication multiplication = multiplicationService.createRandomMultiplication();
+        Multiplication multiplication = multiplicationServiceImpl.createRandomMultiplication();
         // then
         assertThat(multiplication.getFactorA()).isEqualTo(50);
         assertThat(multiplication.getFactorB()).isEqualTo(30);
-        assertThat(multiplication.getResult()).isEqualTo(1500);
+//        assertThat(multiplication.getResult()).isEqualTo(1500);
     }
 }

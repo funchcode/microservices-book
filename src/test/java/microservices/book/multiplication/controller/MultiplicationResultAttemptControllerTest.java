@@ -18,6 +18,8 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -32,7 +34,8 @@ public class MultiplicationResultAttemptControllerTest {
     @Autowired
     private MockMvc mvc;
 
-    private JacksonTester<MultiplicationResultAttempt> jsonResult;
+    private JacksonTester<MultiplicationResultAttempt> jsonResultAttempt;
+    private JacksonTester<List<MultiplicationResultAttempt>> jsonResultAttemptList;
     private JacksonTester<MultiplicationResultAttemptController.ResultResponse> jsonResponse;
 
     @BeforeEach
@@ -57,7 +60,7 @@ public class MultiplicationResultAttemptControllerTest {
                 .willReturn(correct);
         User user = new User("Fun_ch");
         Multiplication multiplication = new Multiplication(50, 70);
-        MultiplicationResultAttempt attempt = new MultiplicationResultAttempt(user, multiplication, 3500);
+        MultiplicationResultAttempt attempt = new MultiplicationResultAttempt(user, multiplication, 3500, correct);
 
         // when
         MockHttpServletResponse response = mvc.perform(post("/results")

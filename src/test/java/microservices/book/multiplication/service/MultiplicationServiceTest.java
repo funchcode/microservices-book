@@ -1,6 +1,8 @@
 package microservices.book.multiplication.service;
 
 import microservices.book.multiplication.domain.Multiplication;
+import microservices.book.multiplication.repository.MultiplicationResultAttemptRepository;
+import microservices.book.multiplication.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -17,13 +19,18 @@ public class MultiplicationServiceTest {
 
     private MultiplicationServiceImpl multiplicationServiceImpl;
 
+
     @Mock
     private RandomGeneratorService randomGeneratorService;
+    @Mock
+    private MultiplicationResultAttemptRepository attemptRepository;
+    @Mock
+    private UserRepository userRepository;
 
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        multiplicationServiceImpl = new MultiplicationServiceImpl(randomGeneratorService);
+        multiplicationServiceImpl = new MultiplicationServiceImpl(randomGeneratorService, attemptRepository, userRepository);
     }
 
     @Test

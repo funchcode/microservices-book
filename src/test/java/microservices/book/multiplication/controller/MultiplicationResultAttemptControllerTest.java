@@ -5,6 +5,7 @@ import microservices.book.multiplication.domain.Multiplication;
 import microservices.book.multiplication.domain.MultiplicationResultAttempt;
 import microservices.book.multiplication.domain.User;
 import microservices.book.multiplication.service.MultiplicationService;
+import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 @WebMvcTest(MultiplicationResultAttemptController.class)
 public class MultiplicationResultAttemptControllerTest {
@@ -65,13 +67,31 @@ public class MultiplicationResultAttemptControllerTest {
         // when
         MockHttpServletResponse response = mvc.perform(post("/results")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(jsonResult.write(attempt).getJson())
+                .content(jsonResultAttempt.write(attempt).getJson())
         ).andReturn().getResponse();
 
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
         assertThat(response.getContentAsString())
                 .isEqualTo(jsonResponse.write(new MultiplicationResultAttemptController.ResultResponse(correct)).getJson());
+    }
+
+    @Test
+    public void getUserStats() throws Exception {
+        // given
+        User user = new User("Fun_ch");
+        Multiplication multiplication = new Multiplication(50, 70);
+        MultiplicationResultAttempt attempt =
+                new MultiplicationResultAttempt(user, multiplication, 3500, true);
+        List<MultiplicationResultAttempt> recentAttempts = Lists.newArrayList(attempt, attempt);
+        given(multiplicationService.getStatsForUser("Fun_ch")).willReturn(recentAttempts);
+
+        // when
+        MockHttpServletResponse response = mvc.perform(get("/results").param("alias", "Fun_ch")).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString()).isEqualTo(jsonResultAttemptList.write(recentAttempts).getJson());
     }
 
 }

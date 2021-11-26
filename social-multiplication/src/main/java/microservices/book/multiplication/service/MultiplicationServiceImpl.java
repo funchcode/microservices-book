@@ -1,5 +1,7 @@
 package microservices.book.multiplication.service;
 
+import microservices.book.multiplication.amqp.EventDispatcher;
+import microservices.book.multiplication.amqp.MultiplicationSolvedEvent;
 import microservices.book.multiplication.domain.Multiplication;
 import microservices.book.multiplication.domain.MultiplicationResultAttempt;
 import microservices.book.multiplication.domain.User;
@@ -19,16 +21,19 @@ public class MultiplicationServiceImpl implements MultiplicationService {
     private RandomGeneratorService randomGeneratorService;
     private MultiplicationResultAttemptRepository attemptRepository;
     private UserRepository userRepository;
+    private EventDispatcher eventDispatcher;
 
     @Autowired
     public MultiplicationServiceImpl(
             final RandomGeneratorService randomGeneratorService,
             final MultiplicationResultAttemptRepository attemptRepository,
-            final UserRepository userRepository
+            final UserRepository userRepository,
+            final EventDispatcher eventDispatcher
     ) {
         this.randomGeneratorService = randomGeneratorService;
         this.attemptRepository = attemptRepository;
         this.userRepository = userRepository;
+        this.eventDispatcher = eventDispatcher;
     }
 
     @Override
@@ -50,6 +55,11 @@ public class MultiplicationServiceImpl implements MultiplicationService {
 
         MultiplicationResultAttempt checkedAttempt = new MultiplicationResultAttempt(user.orElse(resultAttempt.getUser()), resultAttempt.getMultiplication(), resultAttempt.getResultAttempt(), isCorrect);
         attemptRepository.save(checkedAttempt);
+        eventDispatcher.send(new MultiplicationSolvedEvent(
+                checkedAttempt.getId(),
+                checkedAttempt.getUser().getId(),
+                checkedAttempt.isCorrect()
+        ));
         return isCorrect;
     }
 
